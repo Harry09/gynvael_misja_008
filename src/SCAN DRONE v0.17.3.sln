@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.15
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SCAN DRONE v0.17.3", "SCAN DRONE v0.17.3\SCAN DRONE v0.17.3.vcxproj", "{E571C449-DC1B-4EB3-8BE9-C294C36E43F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E571C449-DC1B-4EB3-8BE9-C294C36E43F3}.Debug|x64.ActiveCfg = Debug|x64
+		{E571C449-DC1B-4EB3-8BE9-C294C36E43F3}.Debug|x64.Build.0 = Debug|x64
+		{E571C449-DC1B-4EB3-8BE9-C294C36E43F3}.Release|x64.ActiveCfg = Release|x64
+		{E571C449-DC1B-4EB3-8BE9-C294C36E43F3}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
