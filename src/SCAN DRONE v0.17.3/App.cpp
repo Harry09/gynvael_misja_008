@@ -14,7 +14,7 @@ App::App()
 
 	m_pDrone = std::make_shared<sf::CircleShape>(0.5f * PIXEL_SCALE);
 	m_pDrone->setFillColor(sf::Color::Black);
-	m_pDrone->setOrigin(m_pDrone->getRadius(), m_pDrone->getRadius());
+	//m_pDrone->setOrigin(m_pDrone->getRadius(), m_pDrone->getRadius());
 
 	MoveView(m_pCurrentScan->GetPos());
 	AddScanToMap();
