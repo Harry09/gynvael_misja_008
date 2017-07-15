@@ -2,13 +2,18 @@
 
 #include "Map.h"
 
-int main()
+int main(int argc, char **argv)
 {
-	// parse all files and save as image
-	/*Map map;
-	map.LoadAllScans("scans\\");
-	map.SaveAsImage("map.jpg");*/
-
-	App app;
-	app.Run();
+	if (argc == 2)
+	{
+		// parse all files and save as image
+		Map map;
+		map.LoadAllScans(argv[1]);
+		map.SaveAsImage("map.jpg");
+	}
+	else
+	{
+		App app;
+		app.Run();
+	}
 }
