@@ -10,6 +10,7 @@ char ScanData::s_baseURL[] = "http://gynvael.coldwind.pl/misja008_drone_io/scans
 
 bool ScanData::Load(const char *scanName, const char *baseDir)
 {
+
 	//printf("Loading scan '%s'...\n", scanName);
 
 	CreateDirectory(baseDir, 0);
@@ -71,9 +72,15 @@ bool ScanData::Parse(const char *filePath)
 		{
 			lineNumber++;
 
-			// skip header
+			// header
 			if (lineNumber == 1)
-				continue;
+			{
+				if (data != "SCAN DRONE v0.17.3")
+				{
+					file.close();
+					return false;
+				}
+			}
 
 			// position
 			if (lineNumber == 2)
