@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <memory>
+#include <mutex>
 
 namespace sf
 {
@@ -17,9 +18,14 @@ namespace sf
 class Map
 {
 private:
-	std::shared_ptr<sf::Image> m_pMap;
-	std::shared_ptr<sf::Texture> m_pMapTexture;
-	std::shared_ptr<sf::Sprite>	m_pMapSprite;
+	std::mutex						m_pMapMutex;
+
+	std::shared_ptr<sf::Image>		m_pMap;
+	std::shared_ptr<sf::Texture>	m_pMapTexture;
+	std::shared_ptr<sf::Sprite>		m_pMapSprite;
+
+private:
+	void LoadOnThread(const std::vector<std::string> &files, int start, int end);
 
 public:
 	Map();

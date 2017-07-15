@@ -8,6 +8,7 @@
 
 #include <filesystem>
 #include <cstdlib>
+#include <thread>
 
 Map::Map()
 {
@@ -28,7 +29,18 @@ void Map::AddPoint(const sf::Vector2f &dronePos, int angle, float length)
 	{
 		auto wallPos = dronePos + LenDir(length, static_cast<float>(angle));
 
-		m_pMap->setPixel(static_cast<unsigned int>(wallPos.x * App::PIXEL_SCALE), static_cast<unsigned int>(wallPos.y * App::PIXEL_SCALE), sf::Color::Black);
+		while (true)
+		{
+			if (m_pMapMutex.try_lock())
+			{
+				m_pMap->setPixel(static_cast<unsigned int>(wallPos.x * App::PIXEL_SCALE), static_cast<unsigned int>(wallPos.y * App::PIXEL_SCALE), sf::Color::Black);
+
+				m_pMapMutex.unlock();
+				break;
+			}
+
+			sf::sleep(sf::milliseconds(10));
+		}
 	}
 }
 
@@ -39,32 +51,77 @@ void Map::RefreshTexture()
 
 void Map::LoadAllScans(const char *folderLocation)
 {
-	printf("loading...\n");
+	printf("Loading...\n");
+
+	std::vector<std::string> files;
 
 	for (auto& file : std::experimental::filesystem::directory_iterator(folderLocation))
 	{
+		std::wstring wstr = file.path();
+		std::string str(wstr.begin(), wstr.end());
+		files.push_back(str);
+	}
+
+	printf("Files: %lld\n", files.size());
+
+	int nCores = std::thread::hardware_concurrency();
+
+	printf("Number of cores: %d\n", nCores);
+
+	std::vector<std::thread> threads;
+
+	int filesForCore = static_cast<int>(files.size()) / nCores;
+	printf("Files per core: %d\n", filesForCore);
+
+	for (int i = 0; i < nCores; ++i)
+	{
+		int start = i * filesForCore;
+
+		int end = 0;
+
+		if ((i + 1) == nCores)
+			end = static_cast<int>(files.size());
+		else
+			end = (i + 1) * filesForCore;
+
+		threads.push_back(std::thread(&Map::LoadOnThread, this, files, start, end));
+	}
+
+	for (int i = 0; i < nCores; ++i)
+	{
+		threads[i].join();
+	}
+
+	printf("Loaded!\n");
+
+	RefreshTexture();
+}
+
+void Map::LoadOnThread(const std::vector<std::string>& files, int start, int end)
+{
+	printf("Start thread: (%d, %d)\n", start, end);
+
+	for (int i = start; i < end; ++i)
+	{
+		std::string file = files.at(i);
+
 		ScanData scan;
 
-		std::wstring wstr = file.path();
+		int backslashOffset = static_cast<int>(file.find_first_of("\\"));
 
-		std::string str(wstr.begin(), wstr.end());
-
-		int backslashOffset = static_cast<int>(str.find_first_of("\\"));
-
-		scan.Load(str.substr(backslashOffset, str.size() - backslashOffset).c_str(), str.substr(0, backslashOffset).c_str());
-
-		auto lengths = scan.GetLengths();
-		auto dronePos = scan.GetPos();
-
-		for (auto& length : *lengths)
+		if (scan.Load(file.substr(backslashOffset, file.size() - backslashOffset).c_str(), file.substr(0, backslashOffset).c_str()))
 		{
-			AddPoint(sf::Vector2f(static_cast<float>(dronePos.x), static_cast<float>(dronePos.y)), length.angle, length.length);
+			auto lengths = scan.GetLengths();
+			auto dronePos = scan.GetPos();
+
+			for (auto& length : *lengths)
+			{
+				AddPoint(sf::Vector2f(static_cast<float>(dronePos.x), static_cast<float>(dronePos.y)), length.angle, length.length);
+			}
 		}
 	}
 
-	printf("loaded!\n");
-
-	RefreshTexture();
+	printf("End thread: (%d, %d)\n", start, end);
 }
 
 void Map::SaveAsImage(const char *imagePath)
